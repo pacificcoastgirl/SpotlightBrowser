@@ -59,10 +59,13 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="FeedReader.cs" />
+    <Compile Include="IFeedReader.cs" />
+    <Compile Include="SpotlightFeedReader.cs" />
     <Compile Include="SpotlightItem.cs" />
     <Compile Include="SpotlightItemRoot.cs" />
+    <Compile Include="SpotlightItemViewModel.cs" />
     <Compile Include="SpotlightViewModel.cs" />
+    <Compile Include="ViewModelBase.cs" />
     <Page Include="SpotlightView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

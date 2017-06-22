@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SpotlightBrowser;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace SpotlightBrowserTester
@@ -8,16 +9,17 @@ namespace SpotlightBrowserTester
     public class SpotlightViewModelTests
     {
         [TestMethod]
-        public void SpotlightViewModelHasItemsTest()
+        public async Task SpotlightViewModelHasItemsTest()
         {
             // arrange
             SpotlightViewModel systemUnderTest = new SpotlightViewModel();
 
             // act
-            var items = systemUnderTest.Items;
-
+            var items = await systemUnderTest.GetItemsAsync();
+            
             // assert
             Assert.IsNotNull(items);
+            Assert.AreEqual(6, items.ToList().Count);
         }
 
         [TestMethod]
@@ -32,6 +34,32 @@ namespace SpotlightBrowserTester
             // assert
             Assert.IsFalse(isOffline);
         }
+
+        [TestMethod]
+        public void SpotlightViewModelIsFeedLoadedTest()
+        {
+            // arrange
+            SpotlightViewModel systemUnderTest = new SpotlightViewModel();
+
+            // act
+            var isLoaded = systemUnderTest.IsFeedLoaded;
+
+            // assert
+            Assert.IsTrue(isLoaded);
+        }
+
+        [TestMethod]
+        public void SpotlightViewModelIsFeedErroredTest()
+        {
+            // arrange
+            SpotlightViewModel systemUnderTest = new SpotlightViewModel();
+
+            // act
+            var isErrored = systemUnderTest.IsFeedErrored;
+
+            // assert
+            Assert.IsFalse(isErrored);
+        }
     }
 
     [TestClass]
@@ -42,7 +70,7 @@ namespace SpotlightBrowserTester
         {
             // arrange
             string url = "https://mediadiscovery.microsoft.com/v1.0/channels/video.spotlight?languages=en&market=US&storeVersion=10.17054.13511.0&clientType=MsVideo&deviceFamily=Windows.Desktop";
-            FeedReader systemUnderTest = new FeedReader(url);
+            SpotlightFeedReader systemUnderTest = new SpotlightFeedReader(url);
 
             // act
             var isAvailable = systemUnderTest.IsFeedAvailable;
@@ -56,7 +84,7 @@ namespace SpotlightBrowserTester
         {
             // arrange
             string url = "https://mediadiscovery.microsoft.com/v1.0/channels/video.spotlight?languages=en&market=US&storeVersion=10.17054.13511.0&clientType=MsVideo&deviceFamily=Windows.Desktop";
-            FeedReader systemUnderTest = new FeedReader(url);
+            SpotlightFeedReader systemUnderTest = new SpotlightFeedReader(url);
 
             // act
             var items = await systemUnderTest.GetFeedAsync();
@@ -70,7 +98,7 @@ namespace SpotlightBrowserTester
         {
             // arrange
             string url = "https://mediadiscovery.microsoft.com/v1.0/channels/video.spotlight?languages=en&market=US&storeVersion=10.17054.13511.0&clientType=MsVideo&deviceFamily=Windows.Desktop";
-            FeedReader systemUnderTest = new FeedReader(url);
+            SpotlightFeedReader systemUnderTest = new SpotlightFeedReader(url);
 
             // act
             var root = await systemUnderTest.GetFeedAsync();
@@ -86,7 +114,7 @@ namespace SpotlightBrowserTester
         {
             // arrange
             string url = "https://mediadiscovery.microsoft.com/v1.0/channels/video.spotlight?languages=en&market=US&storeVersion=10.17054.13511.0&clientType=MsVideo&deviceFamily=Windows.Desktop";
-            FeedReader systemUnderTest = new FeedReader(url);
+            SpotlightFeedReader systemUnderTest = new SpotlightFeedReader(url);
 
             // act
             var urlFromFeedReader = systemUnderTest.Url;
