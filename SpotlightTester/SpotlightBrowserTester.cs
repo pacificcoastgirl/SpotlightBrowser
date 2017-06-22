@@ -21,7 +21,7 @@ namespace SpotlightBrowserTester
             Assert.IsNotNull(items);
             Assert.AreEqual(6, items.ToList().Count);
         }
-
+        
         [TestMethod]
         public void SpotlightViewModelIsOnlineTest()
         {

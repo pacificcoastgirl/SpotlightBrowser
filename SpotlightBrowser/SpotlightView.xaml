@@ -5,11 +5,20 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SpotlightBrowser"
         mc:Ignorable="d"
-        Title="My Movies and TV Feed" Height="350" Width="525"
+        Title="My Movies and TV Feed" Height="500" Width="800"
         DataContext="{StaticResource SpotlightViewModel}">
     
     <Grid>
-        <ListBox ItemsSource="{Binding Items}"/>
+        <ListBox ItemsSource="{Binding Items}" >
+            <ListBox.ItemTemplate>
+                <DataTemplate DataType="{x:Type local:SpotlightItemViewModel}">
+                    <Grid>
+                        <Image Source="{Binding ImageUrl}"/>
+                        <TextBlock Text="{Binding Title}" />
+                    </Grid>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
     </Grid>
     
 </Window>

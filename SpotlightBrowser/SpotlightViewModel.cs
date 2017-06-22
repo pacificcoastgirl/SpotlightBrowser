@@ -15,7 +15,7 @@ namespace SpotlightBrowser
     {
         private static string k_spotlightFeedUrl = "https://mediadiscovery.microsoft.com/v1.0/channels/video.spotlight?languages=en&market=US&storeVersion=10.17054.13511.0&clientType=MsVideo&deviceFamily=Windows.Desktop";
         private SpotlightFeedReader m_reader;
-        private IEnumerable<string> m_items;
+        private IEnumerable<SpotlightItemViewModel> m_items;
 
         public SpotlightViewModel()
             : this(k_spotlightFeedUrl)
@@ -48,16 +48,16 @@ namespace SpotlightBrowser
         /// Asynchronously returns the items contained in the feed.
         /// </summary>
         /// <returns></returns>
-        public async Task<IEnumerable<string>> GetItemsAsync()
+        public async Task<IEnumerable<SpotlightItemViewModel>> GetItemsAsync()
         {
             var root = await m_reader.GetFeedAsync();
-            return root.Items.Select(i => i.Title);
+            return root.Items.Select(i => new SpotlightItemViewModel(i.Title, i.Description, i.ImageUrl, i.Id, i.ItemType));
         }
 
         /// <summary>
         /// The items in the feed.
         /// </summary>
-        public IEnumerable<string> Items
+        public IEnumerable<SpotlightItemViewModel> Items
         {
             get
             {
