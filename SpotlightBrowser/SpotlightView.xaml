@@ -7,8 +7,9 @@
         mc:Ignorable="d"
         Title="My Movies and TV Feed" Height="350" Width="525"
         DataContext="{StaticResource SpotlightViewModel}">
+    
     <Grid>
-        <ListBox ItemsSource="{Binding Items}">
-        </ListBox>
+        <ListBox ItemsSource="{Binding Items}"/>
     </Grid>
+    
 </Window>
