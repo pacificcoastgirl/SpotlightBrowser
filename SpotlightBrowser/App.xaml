@@ -3,7 +3,4 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:SpotlightBrowser"
              StartupUri="SpotlightView.xaml">
-    <Application.Resources>
-        <local:SpotlightViewModel x:Key="SpotlightViewModel" />
-    </Application.Resources>
 </Application>

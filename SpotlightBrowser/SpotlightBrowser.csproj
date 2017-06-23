@@ -59,6 +59,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="BooleanConverter.cs" />
+    <Compile Include="SpotlightViewModelFactory.cs" />
+    <Compile Include="SpotlightFeedReaderFactory.cs" />
     <Compile Include="IFeedReader.cs" />
     <Compile Include="SpotlightFeedReader.cs" />
     <Compile Include="SpotlightItem.cs" />

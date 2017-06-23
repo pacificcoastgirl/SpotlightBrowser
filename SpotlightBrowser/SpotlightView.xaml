@@ -6,10 +6,23 @@
         xmlns:local="clr-namespace:SpotlightBrowser"
         mc:Ignorable="d"
         Title="My Movies and TV Feed" Height="500" Width="800"
-        DataContext="{StaticResource SpotlightViewModel}">
+        Loaded="Window_Loaded">
+    
+    <Window.Resources>
+        <local:BooleanToVisibilityConverter 
+            x:Key="BooleanToVisibilityConverter"
+            True="Visible" 
+            False="Collapsed" />
+        <local:BooleanToVisibilityConverter 
+            x:Key="BooleanToVisibilityInverseConverter"
+            True="Collapsed" 
+            False="Visible" />
+    </Window.Resources>
     
     <Grid>
-        <ListBox ItemsSource="{Binding Items}" >
+        
+        <ListBox ItemsSource="{Binding Items}"
+                 Visibility="{Binding IsFeedAvailable, Converter={StaticResource BooleanToVisibilityConverter}}">
             <ListBox.ItemTemplate>
                 <DataTemplate DataType="{x:Type local:SpotlightItemViewModel}">
                     <Grid>
@@ -19,6 +32,14 @@
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
+
+        <TextBlock Height="60" 
+                   Foreground="DarkGray"
+                   VerticalAlignment="Bottom"
+                   HorizontalAlignment="Center"
+                   Margin="0,0,0,80"
+                   Visibility="{Binding IsFeedAvailable, Converter={StaticResource BooleanToVisibilityInverseConverter}}"
+                   Text="{Binding Hint}"/>
     </Grid>
     
 </Window>

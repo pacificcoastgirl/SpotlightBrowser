@@ -5,60 +5,65 @@ using System.Threading.Tasks;
 
 namespace SpotlightBrowserTester
 {
+    public class SpotlightBrowserTestOps
+    {
+        public static string k_validFeedUrl = "https://mediadiscovery.microsoft.com/v1.0/channels/video.spotlight?languages=en&market=US&storeVersion=10.17054.13511.0&clientType=MsVideo&deviceFamily=Windows.Desktop";
+        public static string k_invalidFeedUrl = "";
+    }
+
     [TestClass]
     public class SpotlightViewModelTests
     {
+       
         [TestMethod]
         public async Task SpotlightViewModelHasItemsTest()
         {
             // arrange
-            SpotlightViewModel systemUnderTest = new SpotlightViewModel();
+            var systemUnderTest = await SpotlightViewModelFactory.CreateSpotlightViewModel(SpotlightBrowserTestOps.k_validFeedUrl);
 
             // act
-            var items = await systemUnderTest.GetItemsAsync();
-            
+            var items = systemUnderTest.Items;
+            var hintText = systemUnderTest.Hint;
+
             // assert
             Assert.IsNotNull(items);
             Assert.AreEqual(6, items.ToList().Count);
+            Assert.AreEqual(string.Empty, hintText);
         }
         
         [TestMethod]
-        public void SpotlightViewModelIsOnlineTest()
+        public async Task SpotlightViewModelIsFeedAvailableTest()
         {
             // arrange
-            SpotlightViewModel systemUnderTest = new SpotlightViewModel();
+            var systemUnderTest = await SpotlightViewModelFactory.CreateSpotlightViewModel(SpotlightBrowserTestOps.k_validFeedUrl);
 
             // act
-            var isOffline = systemUnderTest.IsOffline;
-
-            // assert
-            Assert.IsFalse(isOffline);
-        }
-
-        [TestMethod]
-        public void SpotlightViewModelIsFeedLoadedTest()
-        {
-            // arrange
-            SpotlightViewModel systemUnderTest = new SpotlightViewModel();
-
-            // act
-            var isLoaded = systemUnderTest.IsFeedLoaded;
-
-            // assert
-            Assert.IsTrue(isLoaded);
-        }
-
-        [TestMethod]
-        public void SpotlightViewModelIsFeedErroredTest()
-        {
-            // arrange
-            SpotlightViewModel systemUnderTest = new SpotlightViewModel();
-
-            // act
+            var isAvailable = systemUnderTest.IsFeedAvailable;
             var isErrored = systemUnderTest.IsFeedErrored;
+            var hintText = systemUnderTest.Hint;
 
             // assert
+            Assert.IsTrue(isAvailable);
             Assert.IsFalse(isErrored);
+            Assert.AreEqual(string.Empty, hintText);
+        }
+
+        [TestMethod]
+        public async Task SpotlightViewModelIsInvalidFeedUnavailableTest()
+        {
+            // arrange
+            var systemUnderTest = await SpotlightViewModelFactory.CreateSpotlightViewModel(SpotlightBrowserTestOps.k_invalidFeedUrl);
+
+            // act
+            Assert.IsNotNull(systemUnderTest);
+            var isAvailable = systemUnderTest.IsFeedAvailable;
+            var isErrored = systemUnderTest.IsFeedErrored;
+            var hintText = systemUnderTest.Hint;
+
+            // assert
+            Assert.IsFalse(isAvailable);
+            Assert.IsTrue(isErrored);
+            Assert.AreNotEqual(string.Empty, hintText);
         }
     }
 
@@ -66,28 +71,43 @@ namespace SpotlightBrowserTester
     public class FeedReaderTests
     {
         [TestMethod]
-        public void CheckIsFeedAvailableTest()
+        public async Task CheckIsFeedAvailableTest()
         {
             // arrange
-            string url = "https://mediadiscovery.microsoft.com/v1.0/channels/video.spotlight?languages=en&market=US&storeVersion=10.17054.13511.0&clientType=MsVideo&deviceFamily=Windows.Desktop";
-            SpotlightFeedReader systemUnderTest = new SpotlightFeedReader(url);
+            var systemUnderTest = await SpotlightFeedReaderFactory.CreateSpotlightFeedReader(SpotlightBrowserTestOps.k_validFeedUrl);
 
             // act
             var isAvailable = systemUnderTest.IsFeedAvailable;
+            var isErrored = systemUnderTest.IsErrored;
 
             // assert
             Assert.IsTrue(isAvailable);
+            Assert.IsFalse(isErrored);
+        }
+
+        [TestMethod]
+        public async Task CheckIsInvalidFeedUnavailableTest()
+        {
+            // arrange
+            var systemUnderTest = await SpotlightFeedReaderFactory.CreateSpotlightFeedReader(SpotlightBrowserTestOps.k_invalidFeedUrl);
+
+            // act
+            var isAvailable = systemUnderTest.IsFeedAvailable;
+            var isErrored = systemUnderTest.IsErrored;
+
+            // assert
+            Assert.IsFalse(isAvailable);
+            Assert.IsTrue(isErrored);
         }
 
         [TestMethod]
         public async Task CheckFeedHasItemsTest()
         {
             // arrange
-            string url = "https://mediadiscovery.microsoft.com/v1.0/channels/video.spotlight?languages=en&market=US&storeVersion=10.17054.13511.0&clientType=MsVideo&deviceFamily=Windows.Desktop";
-            SpotlightFeedReader systemUnderTest = new SpotlightFeedReader(url);
+            var systemUnderTest = await SpotlightFeedReaderFactory.CreateSpotlightFeedReader(SpotlightBrowserTestOps.k_validFeedUrl);
 
             // act
-            var items = await systemUnderTest.GetFeedAsync();
+            var items = systemUnderTest.GetFeed();
 
             // assert
             Assert.IsNotNull(items);
@@ -97,11 +117,10 @@ namespace SpotlightBrowserTester
         public async Task CheckFeedHasSixItemsTest()
         {
             // arrange
-            string url = "https://mediadiscovery.microsoft.com/v1.0/channels/video.spotlight?languages=en&market=US&storeVersion=10.17054.13511.0&clientType=MsVideo&deviceFamily=Windows.Desktop";
-            SpotlightFeedReader systemUnderTest = new SpotlightFeedReader(url);
+            var systemUnderTest = await SpotlightFeedReaderFactory.CreateSpotlightFeedReader(SpotlightBrowserTestOps.k_validFeedUrl);
 
             // act
-            var root = await systemUnderTest.GetFeedAsync();
+            var root = systemUnderTest.GetFeed();
             var numItems = root.Items.Count;
 
             // assert
@@ -110,18 +129,17 @@ namespace SpotlightBrowserTester
         }
 
         [TestMethod]
-        public void CheckFeedHasUrlTest()
+        public async Task CheckFeedHasUrlTest()
         {
             // arrange
-            string url = "https://mediadiscovery.microsoft.com/v1.0/channels/video.spotlight?languages=en&market=US&storeVersion=10.17054.13511.0&clientType=MsVideo&deviceFamily=Windows.Desktop";
-            SpotlightFeedReader systemUnderTest = new SpotlightFeedReader(url);
+            var systemUnderTest = await SpotlightFeedReaderFactory.CreateSpotlightFeedReader(SpotlightBrowserTestOps.k_validFeedUrl);
 
             // act
             var urlFromFeedReader = systemUnderTest.Url;
 
             // assert
             Assert.IsNotNull(urlFromFeedReader);
-            Assert.AreEqual(url, urlFromFeedReader);
+            Assert.AreEqual(SpotlightBrowserTestOps.k_validFeedUrl, urlFromFeedReader);
         }
     }
 }
