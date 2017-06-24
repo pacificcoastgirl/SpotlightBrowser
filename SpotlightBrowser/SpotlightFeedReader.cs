@@ -37,6 +37,7 @@ namespace SpotlightBrowser
         public string Url
         {
             get { return m_url; }
+            set { m_url = value; }
         }
         
         // This method implements some rudimentary thread safety
@@ -57,6 +58,7 @@ namespace SpotlightBrowser
                         lock (m_lock)
                         {
                             m_json = json;
+                            m_isErrored = false;
                         }
                     }
                 }
@@ -65,6 +67,7 @@ namespace SpotlightBrowser
                     lock (m_lock)
                     {
                         m_json = json;
+                        m_isErrored = false;
                     }
                 }
             }
@@ -72,10 +75,15 @@ namespace SpotlightBrowser
             return this;
         }
 
-        public static async Task<SpotlightFeedReader> CreateAsync(string url)
+        public static Task<SpotlightFeedReader> CreateAsync(string url)
         {
             var reader = new SpotlightFeedReader(url);
-            return await reader.InitializeAsync_();
+            return reader.InitializeAsync_();
+        }
+
+        public async Task RefreshFeedAsync()
+        {
+            await InitializeAsync_();
         }
 
         public SpotlightItemRoot GetFeed()

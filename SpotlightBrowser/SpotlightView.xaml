@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         Title="My Movies and TV Feed" Height="500" Width="800"
         Loaded="Window_Loaded">
-    
+
     <Window.Resources>
         <local:BooleanToVisibilityConverter 
             x:Key="BooleanToVisibilityConverter"
@@ -18,28 +18,51 @@
             True="Collapsed" 
             False="Visible" />
     </Window.Resources>
-    
-    <Grid>
-        
-        <ListBox ItemsSource="{Binding Items}"
-                 Visibility="{Binding IsFeedAvailable, Converter={StaticResource BooleanToVisibilityConverter}}">
-            <ListBox.ItemTemplate>
-                <DataTemplate DataType="{x:Type local:SpotlightItemViewModel}">
-                    <Grid>
-                        <Image Source="{Binding ImageUrl}"/>
-                        <TextBlock Text="{Binding Title}" />
-                    </Grid>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
 
-        <TextBlock Height="60" 
+    <Grid>
+        <!-- Main panel for displaying the collection of items in the feed -->
+        <Grid Visibility="{Binding IsFeedLoaded, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}">
+            <ListBox ItemsSource="{Binding Items}"
+                 Visibility="{Binding IsFeedAvailable, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate DataType="{x:Type local:SpotlightItemViewModel}">
+                        <Grid>
+                            <Image Source="{Binding ImageUrl}"/>
+                            <TextBlock Text="{Binding Title}" />
+                        </Grid>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+
+            <!-- Show a retry button and some helper text when the feed is loaded but unavailable -->
+            <StackPanel VerticalAlignment="Bottom"
+                    HorizontalAlignment="Center"
+                    Margin="20"
+                    Visibility="{Binding IsFeedAvailable, Converter={StaticResource BooleanToVisibilityInverseConverter}}">
+                
+                <TextBlock Height="60" 
                    Foreground="DarkGray"
-                   VerticalAlignment="Bottom"
-                   HorizontalAlignment="Center"
-                   Margin="0,0,0,80"
-                   Visibility="{Binding IsFeedAvailable, Converter={StaticResource BooleanToVisibilityInverseConverter}}"
-                   Text="{Binding Hint}"/>
+                   FontSize="18"
+                   Margin="0,0,20,20"
+                   Text="{Binding HintText}"/>
+                
+                <Button Content="{Binding RetryText}"
+                    Command="{Binding RetryCommand}"
+                    Width="80"
+                    Height="30"/>
+
+            </StackPanel>
+        </Grid>
+
+        <!-- Loading indicator -->
+        <Grid Visibility="{Binding IsFeedLoaded, Converter={StaticResource BooleanToVisibilityInverseConverter}}">
+            <TextBlock Text="Loading..."
+                           FontSize="18"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Bottom"
+                           Margin="0,0,20,20"
+                           Foreground="DarkGray"/>
+            
+        </Grid>
     </Grid>
-    
 </Window>

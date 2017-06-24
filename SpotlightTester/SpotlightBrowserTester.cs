@@ -1,4 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 using SpotlightBrowser;
 using System.Linq;
 using System.Threading.Tasks;
@@ -14,7 +15,6 @@ namespace SpotlightBrowserTester
     [TestClass]
     public class SpotlightViewModelTests
     {
-       
         [TestMethod]
         public async Task SpotlightViewModelHasItemsTest()
         {
@@ -23,7 +23,7 @@ namespace SpotlightBrowserTester
 
             // act
             var items = systemUnderTest.Items;
-            var hintText = systemUnderTest.Hint;
+            var hintText = systemUnderTest.HintText;
 
             // assert
             Assert.IsNotNull(items);
@@ -40,7 +40,7 @@ namespace SpotlightBrowserTester
             // act
             var isAvailable = systemUnderTest.IsFeedAvailable;
             var isErrored = systemUnderTest.IsFeedErrored;
-            var hintText = systemUnderTest.Hint;
+            var hintText = systemUnderTest.HintText;
 
             // assert
             Assert.IsTrue(isAvailable);
@@ -58,12 +58,30 @@ namespace SpotlightBrowserTester
             Assert.IsNotNull(systemUnderTest);
             var isAvailable = systemUnderTest.IsFeedAvailable;
             var isErrored = systemUnderTest.IsFeedErrored;
-            var hintText = systemUnderTest.Hint;
+            var hintText = systemUnderTest.HintText;
 
             // assert
             Assert.IsFalse(isAvailable);
             Assert.IsTrue(isErrored);
             Assert.AreNotEqual(string.Empty, hintText);
+        }
+
+        [TestMethod]
+        public async Task SpotlightViewModelRetryTest()
+        {
+            // arrange
+            var systemUnderTest = await SpotlightViewModelFactory.CreateSpotlightViewModel(SpotlightBrowserTestOps.k_invalidFeedUrl);
+
+            // act
+            var isAvailableBefore = systemUnderTest.IsFeedAvailable;
+            systemUnderTest.Url = SpotlightBrowserTestOps.k_validFeedUrl;
+            var retry = systemUnderTest.RetryCommand;
+            await retry.ExecuteAsync(null);
+            var isAvailableAfter = systemUnderTest.IsFeedAvailable;
+
+            // assert
+            Assert.IsFalse(isAvailableBefore);
+            Assert.IsTrue(isAvailableAfter);
         }
     }
 
