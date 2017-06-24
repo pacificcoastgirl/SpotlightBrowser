@@ -4,8 +4,9 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SpotlightBrowser"
+        xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         mc:Ignorable="d"
-        Title="My Movies and TV Feed" Height="500" Width="800"
+        Title="My Movies and TV Feed" Height="800" Width="1200"
         Loaded="Window_Loaded">
 
     <Window.Resources>
@@ -13,56 +14,143 @@
             x:Key="BooleanToVisibilityConverter"
             True="Visible" 
             False="Collapsed" />
+        
         <local:BooleanToVisibilityConverter 
             x:Key="BooleanToVisibilityInverseConverter"
             True="Collapsed" 
             False="Visible" />
+        
+        <LinearGradientBrush
+            x:Key="HeaderBackgroundOpacityMask"
+            StartPoint="0,0"
+            EndPoint="0,1">
+            <GradientStop Color="#00FFFFFF" Offset="0"/>
+            <GradientStop Color="#FFFFFFFF" Offset="0.9"/>
+            <GradientStop Color="#FFFFFFFF" Offset="1"/>
+        </LinearGradientBrush>
+
+        <SolidColorBrush x:Key="TitleBrush" Color="#E5E5E5"/>
+        <SolidColorBrush x:Key="SubtitleBrush" Color="#E5E5E5"/>
+        <SolidColorBrush x:Key="InformationBrush" Color="#4C4C4C"/>
+
+        <Style TargetType="TextBlock" x:Key="TitleTextStyle">
+            <Setter Property="Margin" Value="35,40,0,0"/>
+            <Setter Property="FontSize" Value="30"/>
+            <Setter Property="FontWeight" Value="DemiBold"/>
+        </Style>
+
+        <Style TargetType="TextBlock" x:Key="SubtitleTextStyle">
+            <Setter Property="Margin" Value="35,0,0,0"/>
+            <Setter Property="FontSize" Value="22"/>
+        </Style>
+
+        <Style TargetType="TextBlock" x:Key="HintTextStyle">
+            <Setter Property="Margin" Value="0"/>
+            <Setter Property="FontSize" Value="18"/>
+        </Style>
+
+        <local:EnumToIconConverter x:Key="EnumToIconConverter"/>
+        
     </Window.Resources>
 
     <Grid>
         <!-- Main panel for displaying the collection of items in the feed -->
         <Grid Visibility="{Binding IsFeedLoaded, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}">
-            <ListBox ItemsSource="{Binding Items}"
-                 Visibility="{Binding IsFeedAvailable, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <ListBox.ItemTemplate>
+            
+            <Controls:FlipView x:Name="FlipView"
+                               IsBannerEnabled="True" 
+                               Margin="20"
+                               ItemsSource="{Binding Items}"
+                               Visibility="{Binding IsFeedAvailable, Converter={StaticResource BooleanToVisibilityConverter}}">
+
+                <!-- Specifies how each item is displayed in the flip view container -->
+                <Controls:FlipView.ItemTemplate>
                     <DataTemplate DataType="{x:Type local:SpotlightItemViewModel}">
                         <Grid>
-                            <Image Source="{Binding ImageUrl}"/>
-                            <TextBlock Text="{Binding Title}" />
+
+                            <Image Source="{Binding ImageUrl}"
+                                       Stretch="UniformToFill"/>
+
+                            <Border Background="Black"
+                                    OpacityMask="{StaticResource HeaderBackgroundOpacityMask}"/>
+
+                            <Grid Height="150"
+                                  VerticalAlignment="Bottom"
+                                  Margin="40">
+                                
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="40"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="100"/>
+                                </Grid.ColumnDefinitions>
+                                
+                                <!-- An icon denoting the item type -->
+                                <Image Source="{Binding ItemType, Converter={StaticResource EnumToIconConverter}}"
+                                       Stretch="Fill"
+                                       Width="30"
+                                       Height="30"
+                                       Grid.Column="0"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,0,22"/>
+                                
+                                <!-- The name and description of the item -->
+                                <Grid VerticalAlignment="Top"
+                                      Grid.Column="1">
+                                    
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="3*"/>
+                                        <RowDefinition Height="2*"/>
+                                    </Grid.RowDefinitions>
+
+                                    <TextBlock Text="{Binding Title}"
+                                           Foreground="{StaticResource TitleBrush}"
+                                           Style="{StaticResource TitleTextStyle}"
+                                           Grid.Row="0"/>
+
+                                    <TextBlock Text="{Binding Description}"
+                                           Foreground="{StaticResource SubtitleBrush}"
+                                           Style="{StaticResource SubtitleTextStyle}"
+                                           Grid.Row="1"/>
+                                </Grid>
+
+                            </Grid>
+
                         </Grid>
                     </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
-
+                </Controls:FlipView.ItemTemplate>
+            </Controls:FlipView>
+            
             <!-- Show a retry button and some helper text when the feed is loaded but unavailable -->
-            <StackPanel VerticalAlignment="Bottom"
+            <StackPanel VerticalAlignment="Center"
                     HorizontalAlignment="Center"
                     Margin="20"
                     Visibility="{Binding IsFeedAvailable, Converter={StaticResource BooleanToVisibilityInverseConverter}}">
-                
-                <TextBlock Height="60" 
-                   Foreground="DarkGray"
-                   FontSize="18"
-                   Margin="0,0,20,20"
-                   Text="{Binding HintText}"/>
-                
-                <Button Content="{Binding RetryText}"
-                    Command="{Binding RetryCommand}"
-                    Width="80"
-                    Height="30"/>
+
+                <TextBlock Foreground="{StaticResource InformationBrush}"
+                           Style="{StaticResource HintTextStyle}"
+                           Text="{Binding HintText}"/>
+
+                <Button Command="{Binding RetryCommand}"
+                        Width="90"
+                        Height="40"
+                        Margin="0,20,0,0"
+                        BorderThickness="0">
+                    <TextBlock Text="{Binding RetryText}"
+                               Style="{StaticResource HintTextStyle}"
+                               Foreground="{StaticResource InformationBrush}"/>
+                </Button>
 
             </StackPanel>
         </Grid>
 
         <!-- Loading indicator -->
-        <Grid Visibility="{Binding IsFeedLoaded, Converter={StaticResource BooleanToVisibilityInverseConverter}}">
-            <TextBlock Text="Loading..."
-                           FontSize="18"
-                           HorizontalAlignment="Center"
-                           VerticalAlignment="Bottom"
-                           Margin="0,0,20,20"
-                           Foreground="DarkGray"/>
-            
+        <Grid Visibility="{Binding IsFeedLoaded, Converter={StaticResource BooleanToVisibilityInverseConverter}, FallbackValue=Visible}">
+            <TextBlock Text="Loading Feed..."
+                       Foreground="{StaticResource InformationBrush}"
+                       Style="{StaticResource HintTextStyle}"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"/>
+
         </Grid>
     </Grid>
 </Window>

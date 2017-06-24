@@ -1,4 +1,7 @@
-﻿using System.Windows;
+﻿using System;
+using System.Threading;
+using System.Windows;
+using System.Windows.Threading;
 
 namespace SpotlightBrowser
 {
@@ -7,9 +10,31 @@ namespace SpotlightBrowser
     /// </summary>
     public partial class SpotlightView : Window
     {
+        DispatcherTimer m_dispatcherTimer;
+
         public SpotlightView()
         {
             InitializeComponent();
+            FlipView.HideControlButtons();
+
+            // it's simpler to handle this in the code behind than in XAML, 
+            // and it doesn't belong in the view model as it's a detail of the view
+            m_dispatcherTimer = new DispatcherTimer();
+            m_dispatcherTimer.Tick += OnDispatcherTimerTimeElapsed_;
+            m_dispatcherTimer.Interval = new TimeSpan(0, 0, 5);
+            m_dispatcherTimer.Start();
+        }
+
+        private void OnDispatcherTimerTimeElapsed_(object sender, EventArgs e)
+        {
+            if (FlipView.SelectedIndex == FlipView.Items.Count - 1)
+            {
+                FlipView.SelectedIndex = 0;
+            }
+            else
+            {
+                FlipView.SelectedIndex++;
+            }
         }
 
         private async void Window_Loaded(object sender, RoutedEventArgs e)

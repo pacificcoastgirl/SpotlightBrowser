@@ -11,14 +11,14 @@ namespace SpotlightBrowser
         private string m_description;
         private string m_imageUrl;
         private string m_id;
-        private ItemType m_itemType;
+        private SpotlightFeedItemType m_itemType;
 
         public SpotlightItemViewModel(
             string title, 
             string description, 
             string imageUrl,
             string id,
-            ItemType itemType)
+            SpotlightFeedItemType itemType)
         {
             m_title = title;
             m_description = description;
@@ -59,7 +59,7 @@ namespace SpotlightBrowser
             }
         }
 
-        public ItemType ItemType
+        public SpotlightFeedItemType ItemType
         {
             get
             {

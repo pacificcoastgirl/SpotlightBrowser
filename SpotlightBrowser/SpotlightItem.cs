@@ -1,6 +1,6 @@
 ﻿namespace SpotlightBrowser
 {
-    public enum ItemType
+    public enum SpotlightFeedItemType
     {
         Movie,
         Series,
@@ -13,6 +13,6 @@
         public string Description { get; set; }
         public string ImageUrl { get; set; }
         public string Id { get; set; }
-        public ItemType ItemType { get; set; }
+        public SpotlightFeedItemType ItemType { get; set; }
     }
 }
