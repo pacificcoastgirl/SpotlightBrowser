@@ -24,10 +24,15 @@ namespace SpotlightBrowser
         private IAsyncCommand m_retryCommand;
         private bool m_isLoaded;
 
-        // Instances of this class must be created through the SpotlightViewModelFactory.
-        private SpotlightViewModel()
+        public static async Task<SpotlightViewModel> CreateAsync()
         {
-            m_retryCommand = new AwaitableDelegateCommand(OnRetryFetchFeed_);
+            return await CreateAsync(k_defaultSpotlightFeedUrl, null);
+        }
+
+        public static Task<SpotlightViewModel> CreateAsync(string url, IFeedReader<SpotlightItemRoot> reader)
+        {
+            var vm = new SpotlightViewModel();
+            return vm.InitializeAsync_(url, reader);
         }
 
         /// <summary>
@@ -37,14 +42,9 @@ namespace SpotlightBrowser
         {
             get
             {
-                if (IsFeedErrored)
-                {
-                    return k_offlineHintText;
-                }
-                else
-                {
-                    return string.Empty;
-                }
+                return IsFeedAvailable
+                        ? string.Empty
+                        : k_offlineHintText;
             }
         }
 
@@ -62,12 +62,7 @@ namespace SpotlightBrowser
         /// Returns whether the feed is available for viewing.
         /// </summary>
         public bool IsFeedAvailable { get { return m_reader.IsFeedAvailable; } }
-
-        /// <summary>
-        /// Returns whether the feed has encountered any errors in loading.
-        /// </summary>
-        public bool IsFeedErrored { get { return m_reader.IsErrored; } }
-
+        
         /// <summary>
         /// Returns whether the feed has been loaded.
         /// </summary>
@@ -105,21 +100,15 @@ namespace SpotlightBrowser
                 }
 
                 OnPropertyChanged_(() => IsFeedAvailable);
-                OnPropertyChanged_(() => IsFeedErrored);
 
                 return m_items;
             }
         }
 
-        public static async Task<SpotlightViewModel> CreateAsync()
+        // Instances of this class must be created through the SpotlightViewModelFactory.
+        private SpotlightViewModel()
         {
-            return await CreateAsync(k_defaultSpotlightFeedUrl);
-        }
-
-        public static Task<SpotlightViewModel> CreateAsync(string url)
-        {
-            var vm = new SpotlightViewModel();
-            return vm.InitializeAsync_(url);
+            m_retryCommand = new AwaitableDelegateCommand(OnRetryFetchFeed_);
         }
 
         private async Task OnRetryFetchFeed_()
@@ -133,10 +122,6 @@ namespace SpotlightBrowser
             OnPropertyChanged_(() => Items);
         }
 
-        /// <summary>
-        /// Returns the items contained in the feed.
-        /// </summary>
-        /// <returns></returns>
         private IEnumerable<SpotlightItemViewModel> GetItems_()
         {
             var root = m_reader.GetFeed();
@@ -145,9 +130,15 @@ namespace SpotlightBrowser
             return root.Items.Select(i => new SpotlightItemViewModel(i.Title, i.Description, i.ImageUrl, i.Id, i.ItemType));
         }
 
-        private async Task<SpotlightViewModel> InitializeAsync_(string url)
+        private async Task<SpotlightViewModel> InitializeAsync_(string url, IFeedReader<SpotlightItemRoot> reader)
         {
-            m_reader = await SpotlightFeedReaderFactory.CreateSpotlightFeedReader(url);
+            if (reader == null)
+            {
+                reader = await SpotlightFeedReaderFactory.CreateSpotlightFeedReader(url);
+            }
+
+            m_reader = reader;
+
             return this;
         }
     }

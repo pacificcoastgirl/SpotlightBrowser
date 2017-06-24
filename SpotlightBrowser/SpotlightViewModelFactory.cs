@@ -14,13 +14,14 @@ namespace SpotlightBrowser
         }
 
         /// <summary>
-        /// Overload for creating a SpotlightViewModel with a specific url.
+        /// Overload for creating a SpotlightViewModel with a specific url and dependency
+        /// injected reader. Mostly for unit testing purposes.
         /// </summary>
         /// <param name="url"></param>
         /// <returns></returns>
-        public static async Task<SpotlightViewModel> CreateSpotlightViewModel(string url)
+        public static async Task<SpotlightViewModel> CreateSpotlightViewModel(string url, IFeedReader<SpotlightItemRoot> reader)
         {
-            return await SpotlightViewModel.CreateAsync(url);
+            return await SpotlightViewModel.CreateAsync(url, reader);
         }
     }
 }

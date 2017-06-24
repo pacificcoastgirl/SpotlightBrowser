@@ -25,10 +25,5 @@ namespace SpotlightBrowser
         /// Returns whether this feed can be viewed.
         /// </summary>
         bool IsFeedAvailable { get; }
-
-        /// <summary>
-        /// Returns whether an error was encountered trying to retrieve this feed.
-        /// </summary>
-        bool IsErrored { get; }
     }
 }

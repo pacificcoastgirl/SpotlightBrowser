@@ -1,84 +1,107 @@
 ﻿using Newtonsoft.Json;
 using System.Net;
 using System.Threading.Tasks;
-using System.Collections;
 using System;
 
 namespace SpotlightBrowser
 {
     /// <summary>
-    /// Implementation of IFeedReader that specializes on the root object
+    /// Implementation of IFeedReader that returns the root object
     /// in the spotlight feed's JSON specification.
     /// </summary>
     public class SpotlightFeedReader
         : IFeedReader<SpotlightItemRoot>
     {
         private string m_url;
-        private string m_json;
-        private bool m_isErrored;
-        private object m_lock = new object();
-
-        // Instances of this class must be created through the SpotlightViewModelFactory.
-        private SpotlightFeedReader(string url)
-        {
-            m_url = url;
-        }
-
-        public bool IsFeedAvailable
-        {
-            get { return m_json != null; }
-        }
-
-        public bool IsErrored
-        {
-            get { return m_isErrored; }
-        }
-
-        public string Url
-        {
-            get { return m_url; }
-            set { m_url = value; }
-        }
-        
-        // This method implements some rudimentary thread safety
-        private async Task<SpotlightFeedReader> InitializeAsync_()
-        {
-            if (m_json == null)
-            {
-                var json = await LoadJsonFromCache_(m_url);
-                if (json == null)
-                {
-                    json = await LoadJsonFromWeb_(m_url);
-                    if (json == null)
-                    {
-                        m_isErrored = true;
-                    }
-                    else
-                    {
-                        lock (m_lock)
-                        {
-                            m_json = json;
-                            m_isErrored = false;
-                        }
-                    }
-                }
-                else
-                {
-                    lock (m_lock)
-                    {
-                        m_json = json;
-                        m_isErrored = false;
-                    }
-                }
-            }
-
-            return this;
-        }
+        private IFeedCache<string> m_cache;
+        SpotlightItemRoot m_root;
 
         public static Task<SpotlightFeedReader> CreateAsync(string url)
         {
             var reader = new SpotlightFeedReader(url);
             return reader.InitializeAsync_();
+        }
+
+        public static Task<SpotlightFeedReader> CreateAsync(string url, IFeedCache<string> cache)
+        {
+            var reader = new SpotlightFeedReader(url);
+            return reader.InitializeAsync_(cache);
+        }
+
+        // This call does not distinguish between a web error and a JSON
+        // deserialize error. As an optimization, we could publish an error
+        // enumeration detailing why the feed is unavailable for the view model
+        // to present to the UI.
+        public bool IsFeedAvailable
+        {
+            get { return m_cache.IsFeedAvailable; }
+        }
+        
+        public string Url
+        {
+            get { return m_url; }
+            set { m_url = value; }
+        }
+
+        // Instances of this class must be created through the SpotlightViewModelFactory.
+        // This was done in order to facilitate asynchronous creation of the object.
+        private SpotlightFeedReader(string url)
+        {
+            m_url = url;
+        }
+
+        private async Task<SpotlightFeedReader> InitializeAsync_()
+        {
+            return await InitializeAsync_(m_cache);
+        }
+
+        private async Task<SpotlightFeedReader> InitializeAsync_(IFeedCache<string> cache)
+        {
+            // if the cache has not yet been initialized, initialize it
+            if (cache == null)
+            {
+                cache = await SpotlightFeedCacheFactory.CreateSpotlightFeedCache();
+            }
+
+            m_cache = cache;
+
+            SpotlightItemRoot root = null;
+
+            // try to load the feed from cache
+            var json = cache.GetFeed();
+            if (json != null)
+            {
+                // try to deserialize
+                root = await DeserializeJson_(json);
+                if (root == null)
+                {
+                    // invalid json, clear it and try to fetch from web
+                    json = null;
+                }
+            }
+
+            // if we didn't get a valid json from cache, try to fetch from web
+            if (json == null)
+            {
+                json = await LoadJsonFromWeb_(m_url);
+                if (json != null)
+                {
+                    // try to deserialize
+                    root = await DeserializeJson_(json);
+                    if (root == null)
+                    {
+                        json = null;
+                    }
+                }
+
+                // store the result back in cache; at this point we either have
+                // valid json or an empty string
+                await cache.PutFeedAsync(json);
+            }
+
+            m_root = root;
+
+            return this;
         }
 
         public async Task RefreshFeedAsync()
@@ -88,11 +111,31 @@ namespace SpotlightBrowser
 
         public SpotlightItemRoot GetFeed()
         {
-            if (!IsFeedAvailable) return null;
-
-            return JsonConvert.DeserializeObject<SpotlightItemRoot>(m_json);
+            return m_root;
         }
         
+        private async Task<SpotlightItemRoot> DeserializeJson_(string json)
+        {
+            SpotlightItemRoot root = null;
+            if (json != null)
+            {
+                await Task.Run(() =>
+                {
+                    try
+                    {
+                        root = JsonConvert.DeserializeObject<SpotlightItemRoot>(json);
+                    }
+                    catch (Exception)
+                    {
+                        Console.WriteLine("Failed to deserialize JSON");
+                        root = null;
+                    }
+                });
+            }
+
+            return root;
+        }
+
         private async Task<string> LoadJsonFromWeb_(string url)
         {
             return await Task.Run(() =>
@@ -117,18 +160,6 @@ namespace SpotlightBrowser
                         disposable.Dispose();
                     }
                 }
-
-                return json;
-            });
-        }
-
-        private async Task<string> LoadJsonFromCache_(string url)
-        {
-            return await Task.Run(() =>
-            {
-                string json = null;
-
-                // TODO: implement load from file system cache
 
                 return json;
             });
