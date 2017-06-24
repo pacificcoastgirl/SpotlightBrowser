@@ -1,30 +1,38 @@
-﻿using System;
+﻿using MahApps.Metro.Controls;
+using System;
 using System.Threading;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Threading;
 
 namespace SpotlightBrowser
 {
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    /// Interaction logic for SpotlightView.xaml
     /// </summary>
     public partial class SpotlightView : Window
     {
-        DispatcherTimer m_dispatcherTimer;
-
+        private DispatcherTimer m_dispatcherTimer;
+        private readonly TimeSpan m_timePerPageSeconds = new TimeSpan(0, 0, 10);
+        
         public SpotlightView()
         {
             InitializeComponent();
-            FlipView.HideControlButtons();
 
-            // it's simpler to handle this in the code behind than in XAML, 
-            // and it doesn't belong in the view model as it's a detail of the view
+            // The FlipView control does not provide a two-way bindable selection,
+            // so we'll need to modify it in the code behind
+            //FlipView.ShowControlButtons();
+
+            // Start the progress bar, and animate the duration to make it appear smooth
+            ProgressBar.SetPercent(100, m_timePerPageSeconds);
+
             m_dispatcherTimer = new DispatcherTimer();
             m_dispatcherTimer.Tick += OnDispatcherTimerTimeElapsed_;
-            m_dispatcherTimer.Interval = new TimeSpan(0, 0, 5);
+            m_dispatcherTimer.Interval = m_timePerPageSeconds;
             m_dispatcherTimer.Start();
         }
-
+        
+        // Update the FlipView's current page, and reset the progress bar to zero.
         private void OnDispatcherTimerTimeElapsed_(object sender, EventArgs e)
         {
             if (FlipView.SelectedIndex == FlipView.Items.Count - 1)
@@ -35,8 +43,17 @@ namespace SpotlightBrowser
             {
                 FlipView.SelectedIndex++;
             }
-        }
 
+            ProgressBar.SetPercent(0, TimeSpan.Zero);
+
+            // we have to clear the animation here, as we can't update the value while it's
+            // still animating
+            ProgressBar.BeginAnimation(MetroProgressBar.ValueProperty, null);
+
+            // restart the animation
+            ProgressBar.SetPercent(100, m_timePerPageSeconds);
+        }
+        
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
             // A better solution here would decouple the view model from the view via

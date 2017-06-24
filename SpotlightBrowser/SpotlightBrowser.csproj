@@ -72,6 +72,7 @@
     <Compile Include="CommandExtensions.cs" />
     <Compile Include="DelegateCommand.cs" />
     <Compile Include="EnumToIconConverter.cs" />
+    <Compile Include="ProgressBarExtensions.cs" />
     <Compile Include="SpotlightFeedCache.cs" />
     <Compile Include="IAsyncCommand.cs" />
     <Compile Include="IFeedCache.cs" />
