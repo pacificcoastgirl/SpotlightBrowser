@@ -22,6 +22,7 @@ namespace SpotlightBrowser
             // The FlipView control does not provide a two-way bindable selection,
             // so we'll need to modify it in the code behind
             FlipView.ShowControlButtons();
+            FlipView.SelectionChanged += OnFlipViewSelectionChanged_;
 
             // Start the progress bar, and animate the duration to make it appear smooth
             ProgressBar.SetPercent(100, m_timePerPageSeconds);
@@ -34,7 +35,22 @@ namespace SpotlightBrowser
             m_dispatcherTimer.Interval = m_timePerPageSeconds;
             m_dispatcherTimer.Start();
         }
-        
+
+        private void OnFlipViewSelectionChanged_(object sender, SelectionChangedEventArgs e)
+        {
+            ProgressBar.SetPercent(0, TimeSpan.Zero);
+
+            m_dispatcherTimer.Stop();
+            m_dispatcherTimer.Start();
+
+            // we have to clear the animation here, as we can't update the value while it's
+            // still animating
+            ProgressBar.BeginAnimation(MetroProgressBar.ValueProperty, null);
+
+            // restart the animation
+            ProgressBar.SetPercent(100, m_timePerPageSeconds);
+        }
+
         // Update the FlipView's current page, and reset the progress bar to zero.
         private void OnDispatcherTimerTimeElapsed_(object sender, EventArgs e)
         {
@@ -46,15 +62,6 @@ namespace SpotlightBrowser
             {
                 FlipView.SelectedIndex++;
             }
-
-            ProgressBar.SetPercent(0, TimeSpan.Zero);
-
-            // we have to clear the animation here, as we can't update the value while it's
-            // still animating
-            ProgressBar.BeginAnimation(MetroProgressBar.ValueProperty, null);
-
-            // restart the animation
-            ProgressBar.SetPercent(100, m_timePerPageSeconds);
         }
         
         private async void Window_Loaded(object sender, RoutedEventArgs e)
