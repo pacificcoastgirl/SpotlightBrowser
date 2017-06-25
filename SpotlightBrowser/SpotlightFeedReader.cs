@@ -2,6 +2,7 @@
 using System.Net;
 using System.Threading.Tasks;
 using System;
+using System.Threading;
 
 namespace SpotlightBrowser
 {
@@ -16,12 +17,23 @@ namespace SpotlightBrowser
         private IFeedCache<string> m_cache;
         SpotlightItemRoot m_root;
 
+        /// <summary>
+        /// Create an instance of this object and initialize it asynchronously.
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
         public static Task<SpotlightFeedReader> CreateAsync(string url)
         {
             var reader = new SpotlightFeedReader(url);
             return reader.InitializeAsync_();
         }
 
+        /// <summary>
+        /// Create an instance of this object with a url and caching object provided,
+        /// and initialize it asynchronously.
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
         public static Task<SpotlightFeedReader> CreateAsync(string url, IFeedCache<string> cache)
         {
             var reader = new SpotlightFeedReader(url);
@@ -43,6 +55,16 @@ namespace SpotlightBrowser
             set { m_url = value; }
         }
 
+        public async Task RefreshFeedAsync()
+        {
+            await InitializeAsync_();
+        }
+
+        public SpotlightItemRoot GetFeed()
+        {
+            return m_root;
+        }
+
         // Instances of this class must be created through the SpotlightViewModelFactory.
         // This was done in order to facilitate asynchronous creation of the object.
         private SpotlightFeedReader(string url)
@@ -57,6 +79,15 @@ namespace SpotlightBrowser
 
         private async Task<SpotlightFeedReader> InitializeAsync_(IFeedCache<string> cache)
         {
+            // DEBUGGING ONLY: a hardcoded delay to make sure the loading page is working correctly
+            //await Task.Run(() =>
+            //{
+            //    for (var i = 0; i < 10; i++)
+            //    {
+            //        Thread.Sleep(500);
+            //    }
+            //});
+
             // if the cache has not yet been initialized, initialize it
             if (cache == null)
             {
@@ -104,16 +135,8 @@ namespace SpotlightBrowser
             return this;
         }
 
-        public async Task RefreshFeedAsync()
-        {
-            await InitializeAsync_();
-        }
-
-        public SpotlightItemRoot GetFeed()
-        {
-            return m_root;
-        }
-        
+        // Tries to deserialize the specified JSON string, and returns null if the string
+        // cannot be deserialized
         private async Task<SpotlightItemRoot> DeserializeJson_(string json)
         {
             SpotlightItemRoot root = null;
@@ -136,6 +159,7 @@ namespace SpotlightBrowser
             return root;
         }
 
+        // Tries to fetch the JSON string at the specified url
         private async Task<string> LoadJsonFromWeb_(string url)
         {
             return await Task.Run(() =>
@@ -150,6 +174,7 @@ namespace SpotlightBrowser
                 }
                 catch (Exception)
                 {
+                    Console.WriteLine("Failed to download string from url {0}", url);
                     json = null;
                 }
                 finally

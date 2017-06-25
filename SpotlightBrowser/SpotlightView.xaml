@@ -43,7 +43,7 @@
 
         <Style TargetType="TextBlock" x:Key="SubtitleTextStyle">
             <Setter Property="Margin" Value="35,0,0,0"/>
-            <Setter Property="FontSize" Value="22"/>
+            <Setter Property="FontSize" Value="20"/>
         </Style>
 
         <Style TargetType="TextBlock" x:Key="HintTextStyle">
@@ -54,7 +54,7 @@
         <Style TargetType="Grid" x:Key="ProgressBarContainerStyle">
             <Setter Property="Height" Value="2"/>
             <Setter Property="Width" Value="100"/>
-            <Setter Property="Margin" Value="122,0,0,90"/>
+            <Setter Property="Margin" Value="120,0,0,90"/>
             <Setter Property="HorizontalAlignment" Value="Left"/>
             <Setter Property="VerticalAlignment" Value="Bottom"/>
         </Style>
@@ -83,7 +83,8 @@
             
             <Controls:FlipView x:Name="FlipView"
                                ItemsSource="{Binding Items}"
-                               Visibility="{Binding IsFeedAvailable, Converter={StaticResource BooleanToVisibilityConverter}}">
+                               Visibility="{Binding IsFeedAvailable, Converter={StaticResource BooleanToVisibilityConverter}}"
+                               MouseOverGlowEnabled="False">
 
                 <!-- Specifies how each item is displayed in the flip view container -->
                 <Controls:FlipView.ItemTemplate>
@@ -179,7 +180,7 @@
             <Controls:MetroProgressBar Foreground="{StaticResource InformationBrush}" 
                                        IsIndeterminate="True"
                                        Width="100"
-                                       Margin="0,20"/>
+                                       Margin="0,50"/>
         </StackPanel>
     </Grid>
 </Window>

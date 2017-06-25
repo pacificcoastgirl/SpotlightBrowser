@@ -29,42 +29,27 @@ namespace SpotlightBrowser
 
         public string Title
         {
-            get
-            {
-                return m_title;
-            }
+            get { return m_title; }
         }
 
         public string Description
         {
-            get
-            {
-                return m_description;
-            }
+            get { return m_description; }
         }
 
         public string ImageUrl
         {
-            get
-            {
-                return m_imageUrl;
-            }
+            get { return m_imageUrl; }
         }
 
         public string Id
         {
-            get
-            {
-                return m_id;
-            }
+            get { return m_id; }
         }
 
         public SpotlightFeedItemType ItemType
         {
-            get
-            {
-                return m_itemType;
-            }
+            get { return m_itemType; }
         }
     }
 }

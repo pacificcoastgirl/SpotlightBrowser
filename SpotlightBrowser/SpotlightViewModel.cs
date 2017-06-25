@@ -24,11 +24,22 @@ namespace SpotlightBrowser
         private IAsyncCommand m_retryCommand;
         private bool m_isLoaded;
 
+        /// <summary>
+        /// Create an instance of this object and initialize it asynchronously.
+        /// </summary>
+        /// <returns></returns>
         public static async Task<SpotlightViewModel> CreateAsync()
         {
             return await CreateAsync(k_defaultSpotlightFeedUrl, null);
         }
 
+        /// <summary>
+        /// Create an instance of this object with a url and reader provided,
+        /// and initialize it asynchronously.
+        /// </summary>
+        /// <param name="url"></param>
+        /// <param name="reader"></param>
+        /// <returns></returns>
         public static Task<SpotlightViewModel> CreateAsync(string url, IFeedReader<SpotlightItemRoot> reader)
         {
             var vm = new SpotlightViewModel();
@@ -91,7 +102,6 @@ namespace SpotlightBrowser
         {
             get
             {
-                // Cache the items in memory. This is not scalable.
                 if (m_items == null)
                 {
                     IsFeedLoaded = false;

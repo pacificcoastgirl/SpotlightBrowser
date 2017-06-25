@@ -12,11 +12,6 @@ namespace SpotlightBrowserTester
         public static string k_invalidFeedUrl = "";
     }
 
-    // TODO: add tests for:
-    // * large number of items in feed
-    // * validating item fields
-    // * caching
-
     [TestClass]
     public class SpotlightViewModelTests
     {
@@ -120,23 +115,7 @@ namespace SpotlightBrowserTester
             // assert
             Assert.IsNotNull(items);
         }
-
-        // TODO: update this test to use fake data
-        //[TestMethod]
-        //public async Task SpotlightReaderCheckFeedHasSixItemsTest()
-        //{
-        //    // arrange
-        //    var systemUnderTest = await SpotlightFeedReaderFactory.CreateSpotlightFeedReader(SpotlightBrowserTestOps.k_validFeedUrl);
-
-        //    // act
-        //    var root = systemUnderTest.GetFeed();
-        //    var numItems = root.Items.Count;
-
-        //    // assert
-        //    Assert.IsNotNull(root);
-        //    Assert.AreEqual(6, numItems);
-        //}
-
+        
         [TestMethod]
         public async Task SpotlightReaderCheckFeedHasUrlTest()
         {

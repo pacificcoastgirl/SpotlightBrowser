@@ -21,12 +21,15 @@ namespace SpotlightBrowser
 
             // The FlipView control does not provide a two-way bindable selection,
             // so we'll need to modify it in the code behind
-            //FlipView.ShowControlButtons();
+            FlipView.ShowControlButtons();
 
             // Start the progress bar, and animate the duration to make it appear smooth
             ProgressBar.SetPercent(100, m_timePerPageSeconds);
 
             m_dispatcherTimer = new DispatcherTimer();
+
+            // we don't really care about detaching the event handler, since the timer persists
+            // for the lifetime of the application
             m_dispatcherTimer.Tick += OnDispatcherTimerTimeElapsed_;
             m_dispatcherTimer.Interval = m_timePerPageSeconds;
             m_dispatcherTimer.Start();
