@@ -98,23 +98,29 @@ namespace SpotlightBrowser
 
             SpotlightItemRoot root = null;
 
-            // try to load the feed from cache
-            var json = cache.GetFeed();
+            // try to load the feed from the web first
+            var json = await LoadJsonFromWeb_(m_url);
             if (json != null)
             {
                 // try to deserialize
                 root = await DeserializeJson_(json);
                 if (root == null)
                 {
-                    // invalid json, clear it and try to fetch from web
+                    // invalid json, clear it and try to fetch from cache
                     json = null;
+                }
+                else
+                {
+                    // store the result back in cache; at this point we know we have
+                    // valid json
+                    await cache.PutFeedAsync(json);
                 }
             }
 
-            // if we didn't get a valid json from cache, try to fetch from web
+            // if we didn't get a valid feed from the web, try to fetch from cache
             if (json == null)
             {
-                json = await LoadJsonFromWeb_(m_url);
+                json = cache.GetFeed();
                 if (json != null)
                 {
                     // try to deserialize
@@ -124,10 +130,6 @@ namespace SpotlightBrowser
                         json = null;
                     }
                 }
-
-                // store the result back in cache; at this point we either have
-                // valid json or an empty string
-                await cache.PutFeedAsync(json);
             }
 
             m_root = root;
