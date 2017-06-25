@@ -27,6 +27,8 @@ namespace SpotlightBrowser
             // Start the progress bar, and animate the duration to make it appear smooth
             ProgressBar.SetPercent(100, m_timePerPageSeconds);
 
+            // create a timer which ticks every ten seconds, at which point we turn the 
+            // page in the FlipView
             m_dispatcherTimer = new DispatcherTimer();
 
             // we don't really care about detaching the event handler, since the timer persists
@@ -51,7 +53,7 @@ namespace SpotlightBrowser
             ProgressBar.SetPercent(100, m_timePerPageSeconds);
         }
 
-        // Update the FlipView's current page, and reset the progress bar to zero.
+        // Update the FlipView's current page
         private void OnDispatcherTimerTimeElapsed_(object sender, EventArgs e)
         {
             if (FlipView.SelectedIndex == FlipView.Items.Count - 1)
@@ -67,9 +69,10 @@ namespace SpotlightBrowser
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
             // A better solution here would decouple the view model from the view via
-            // dependency injection, but I took the simpler approach here in letting 
-            // the view be aware of the view model (but not vice versa, to enable unit
-            // testing)
+            // dependency injection (easily facilitated by a framework like Prism), 
+            // but I took the simpler and acceptable approach here in letting the view 
+            // be aware of the view model (but not vice versa, to maintain some separation
+            // of concerns)
             DataContext = await SpotlightViewModelFactory.CreateSpotlightViewModel();
         }
     }

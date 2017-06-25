@@ -82,10 +82,7 @@ namespace SpotlightBrowser
             // DEBUGGING ONLY: a hardcoded delay to make sure the loading page is working correctly
             //await Task.Run(() =>
             //{
-            //    for (var i = 0; i < 10; i++)
-            //    {
-            //        Thread.Sleep(500);
-            //    }
+            //    Thread.Sleep(5000);
             //});
 
             // if the cache has not yet been initialized, initialize it

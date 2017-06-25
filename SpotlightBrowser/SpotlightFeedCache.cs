@@ -44,7 +44,6 @@ namespace SpotlightBrowser
         public async Task PutFeedAsync(string data)
         {
             m_cachedJson = data;
-
             await SaveAsync_();
         }
 
@@ -62,13 +61,11 @@ namespace SpotlightBrowser
         private SpotlightFeedCache()
         { }
 
-        // This method implements some rudimentary thread safety
         private async Task<SpotlightFeedCache> InitializeAsync_()
         {
             return await InitializeAsync_(m_path);
         }
 
-        // This method implements some rudimentary thread safety
         private async Task<SpotlightFeedCache> InitializeAsync_(string path)
         {
             if (path == null)
@@ -82,7 +79,8 @@ namespace SpotlightBrowser
         }
 
         /// <summary>
-        /// Populate the cache from disk.
+        /// Populate the cache from disk. Relies on file system locking
+        /// to throw exceptions when concurrent read/writes are attempted.
         /// </summary>
         private async Task LoadAsync_()
         {
@@ -91,9 +89,8 @@ namespace SpotlightBrowser
 
             try
             {
-                file = new StreamReader(k_defaultCachePath);
+                file = new StreamReader(m_path);
 
-                // read key/value pairs line by line and populate the dictionary
                 data = await file.ReadToEndAsync();
 
                 // replace whatever's been cached locally
@@ -101,7 +98,7 @@ namespace SpotlightBrowser
             }
             catch (Exception)
             {
-                Console.WriteLine("File read failed!");
+                Console.WriteLine("File read from {0} failed!", m_path);
             }
             finally
             {
@@ -111,7 +108,8 @@ namespace SpotlightBrowser
         }
 
         /// <summary>
-        /// Persist the cache to disk.
+        /// Persist the cache to disk. Relies on file system locking
+        /// to throw exceptions when concurrent read/writes are attempted.
         /// </summary>
         /// <returns></returns>
         private async Task SaveAsync_()
@@ -120,12 +118,12 @@ namespace SpotlightBrowser
 
             try
             {
-                file = File.CreateText(k_defaultCachePath);
+                file = File.CreateText(m_path);
                 await file.WriteAsync(m_cachedJson);
             }
             catch (Exception)
             {
-                Console.WriteLine("File write failed!");
+                Console.WriteLine("File write to {0} failed!", m_path);
             }
             finally
             {

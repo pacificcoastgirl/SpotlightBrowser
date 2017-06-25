@@ -104,6 +104,7 @@ namespace SpotlightBrowser
             {
                 if (m_items == null)
                 {
+                    // make sure we are in the loading state while fetching data
                     IsFeedLoaded = false;
                     m_items = GetItems_();
                     IsFeedLoaded = true;
@@ -129,6 +130,7 @@ namespace SpotlightBrowser
             // clear the items list
             m_items = null;
 
+            // force a re-fetch of the items
             OnPropertyChanged_(() => Items);
         }
 
