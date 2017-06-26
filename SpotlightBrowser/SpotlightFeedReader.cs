@@ -16,6 +16,7 @@ namespace SpotlightBrowser
         private string m_url;
         private IFeedCache<string> m_cache;
         SpotlightItemRoot m_root;
+        private string k_defaultImageCachePath = "D:\\";
 
         /// <summary>
         /// Create an instance of this object and initialize it asynchronously.
@@ -108,8 +109,10 @@ namespace SpotlightBrowser
                 }
                 else
                 {
-                    // store the result back in cache; at this point we know we have
-                    // valid json
+                    // if there are web-based images, download them and re-serialize to json
+                    json = await SerializeJsonWithLocalImages_(root);
+
+                    // store the result back in cache; at this point we know we have valid json
                     await cache.PutFeedAsync(json);
                 }
             }
@@ -132,6 +135,40 @@ namespace SpotlightBrowser
             m_root = root;
 
             return this;
+        }
+
+        // Downloads any web-based images and saves them locally, updates image URLs on associated
+        // objects, then re-serializes the resulting objects to JSON
+        private async Task<string> SerializeJsonWithLocalImages_(SpotlightItemRoot root)
+        {
+            string path = k_defaultImageCachePath;
+            int index = 0;
+            string fileRoot = "image";
+            string filename;
+
+            using (var wc = new WebClient())
+            {
+                foreach (var item in root.Items)
+                {
+                    filename = path + fileRoot + index;
+
+                    try
+                    {
+                        // it might be cleaner to have the cache object manage the saving
+                        // to file, but we do it here for simplicity
+                        await wc.DownloadFileTaskAsync(item.ImageUrl, filename);
+                    }
+                    catch (Exception)
+                    {
+                        Console.WriteLine("Failed to download image {0}", item.ImageUrl);
+                    }
+
+                    item.ImageUrl = filename;
+                    index++;
+                }
+            }
+            
+            return JsonConvert.SerializeObject(root);
         }
 
         // Tries to deserialize the specified JSON string, and returns null if the string
